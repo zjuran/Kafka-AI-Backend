@@ -11,12 +11,15 @@ app = Flask(__name__)
 # Load OpenAI API Key securely from environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Set OpenAI API Key for requests
+openai.api_key = OPENAI_API_KEY
+
 @app.route('/chat', methods=['POST'])
 def chat():
-    data = request.json
+    data = request.get_json()  # Correct method to get JSON data
     user_message = data.get("message", "")
-    language = data.get("language", "en")
-    age_group = data.get("age", "adult")
+    language = data.get("language", "en")  # Default language to English
+    age_group = data.get("age", "adult")  # Default age group to adult
 
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
@@ -44,12 +47,12 @@ def chat():
     """
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": prompt}],
+        response = openai.Completion.create(
+            engine="gpt-4",  # Using the gpt-4 model
+            prompt=prompt,
             max_tokens=150
         )
-        reply = response["choices"][0]["message"]["content"].strip()
+        reply = response.choices[0].text.strip()  # Access the generated text
         return jsonify({"response": reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -60,4 +63,4 @@ def home():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Ensure the correct port
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)  # Start Flask app
