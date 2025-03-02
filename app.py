@@ -54,8 +54,10 @@ def chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Get assigned port from Render
-    app.run(host='0.0.0.0', port=port)
+@app.route('/')
+def home():
+    return jsonify({"message": "Kafka AI Backend is running!"})
 
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))  # Ensure the correct port
+    app.run(host='0.0.0.0', port=port)
