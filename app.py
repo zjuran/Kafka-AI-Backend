@@ -3,26 +3,20 @@ import openai
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
+# Initialize Flask app
 app = Flask(__name__)
 
-# Load OpenAI API Key securely from environment variables
+# Load environment variables
+load_dotenv()
+
+# OpenAI API key
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
 
-# Home route to check if backend is running
-@app.route('/')
-def home():
-    return jsonify({"message": "Kafka AI Backend is running!"})
-
-# Chat route for POST requests
+# Define the '/chat' route
 @app.route('/chat', methods=['POST'])
 def chat():
-    data = request.json  # Get JSON data from request
-    print("Received data:", data)  # Debugging line to check incoming data
-
+    data = request.json
     user_message = data.get("message", "")
     language = data.get("language", "en")
     age_group = data.get("age", "adult")
@@ -30,7 +24,7 @@ def chat():
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
-    # Define Kafka's response complexity based on the age group
+    # Kafka's response style based on age group
     complexity_levels = {
         "child": "Respond in a simple and clear way suitable for a child.",
         "teen": "Respond in a thoughtful but accessible way suitable for a teenager.",
@@ -53,7 +47,6 @@ def chat():
     """
 
     try:
-        # Make the API call to OpenAI's GPT model
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt},
@@ -65,8 +58,9 @@ def chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/')
+def home():
+    return jsonify({"message": "Kafka AI Backend is running!"})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Ensure the correct port
-    app.run(host='0.0.0.0', port=port)  # Run the Flask app
-
+    app.run(debug=True)
